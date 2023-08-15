@@ -3,28 +3,31 @@ import * as usersDao from "./users-dao.js";
 let user2;
 
 const AuthController = (app) => {
- const register = (req, res) => {
-    const username = req.body.username;
-    const user = usersDao.findUserByUsername(username);
+ const register = async (req, res) => {
+    const user = await usersDao.findUserByUsername(req.body.username);
     if (user) {
       res.sendStatus(409);
       return;
     }
-    const newUser = usersDao.createUser(req.body);
+    const newUser = await userDao.createUser(req.body);
     //req.session["currentUser"] = newUser;
     user2 = newUser;
     res.json(newUser);
   };
- const login = (req, res) => {
+ const login = async (req, res) => {
    const username = req.body.username;
    const password = req.body.password;
-   const user = usersDao.findUserByCredentials(username, password);
-   if (user) {
-     //req.session["currentUser"] = user;
-     user2 = user;
-     res.json(user);
+   if (username && password) {
+       const user = await usersDao.findUserByCredentials(username, password);
+       if (user) {
+         //req.session["currentUser"] = user;
+         user2 = user;
+         res.json(user);
+       } else {
+         res.sendStatus(403);
+       }
    } else {
-     res.sendStatus(404);
+      res.sendStatus(403);
    }
  };
  const profile = (req, res) => {
